@@ -24,6 +24,7 @@ def createServer():
                 print("socket accept failed")
                 print(e)
                 continue
+            #TODO be able to receive large messages
             rd = clientsocket.recv(5000).decode()
             print(rd)
             httpMessage = HttpMessage(rd)
@@ -33,9 +34,9 @@ def createServer():
             clientsocket.shutdown(SHUT_WR)
 
     except KeyboardInterrupt :
-        print("\nShutting down...\n");
+        print("\nShutting down...\n")
     except Exception as exc :
-        print("Error:\n");
+        print("Error:\n")
         print(exc)
 
     serversocket.close()
@@ -105,9 +106,13 @@ def FindPortDynamically():
             print('Access http://' + server_ip + ':' + str(try_port_num))
             return serversocket
         except Exception as exc :
-            print("Error Finding port " +str(try_port_num) +":\n");
+            print("Error Finding port " +str(try_port_num) +":\n")
             print(exc)
             try_port_num += 1
 
 
 createServer()
+
+
+if __name__ == "__main__":
+    createServer()
