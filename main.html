@@ -1,0 +1,92 @@
+<html>
+<head>
+	<title>Ryan's website</title>
+</head>
+<style>
+  div.text{
+  float:left;
+  margin:5;
+  color:black;
+  }
+  div.time{
+  margin:5;
+  float:left;
+  color:gray;
+  }
+  div.message{
+  margin:10 60 10 60;
+  overflow:hidden;
+  border-style: solid;
+  border-color: green;
+  border-radius: 10px;
+  }
+</style>
+<body>
+  <form action="/" method="POST">
+    <label for="message">Add a message:</label><br>
+    <input type="text" id="message" name="Message" value=""><br><br>
+    <input type="submit" value="Submit">
+  </form> 
+
+  <div id="allMessages">
+  {% for time, message in messages  %}
+  <div class="message" >
+    <div class="time">{{time}}:</div>
+    <div class="text"> {{message}} </div>
+  </div>
+  {% endfor %}
+  </div>
+
+  <button onclick="loadDoc()">Click me</button>
+  <script>
+
+    function GetMessages() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = GotUpdate;
+    messages = document.getElementById("allMessages");
+    numChildren = messages.children.length;
+    xhttp.open("GET", "/messages?numMessages=" + numChildren, true);
+    xhttp.send();
+    console.log("sent message");
+    }
+
+    function GotUpdate(){
+    if (this.readyState == 4 && this.status == 200) {
+    console.log(this.responseText);
+    if(!this.responseText.includes(',')){
+    return;
+    }
+    var messages = this.responseText.split(";")
+    console.log("1")
+    messages.slice(0,-1).forEach(function(item,index){
+    var parts = item.split(",")
+    console.log(parts)
+    var temp = document.getElementById("allMessages");
+    var div = document.createElement('div');
+    div.className = "message";
+    var timeDiv = document.createElement('div');
+    timeDiv.className = "time";
+    timeDiv.innerHTML = parts[0];
+    var messageDiv = document.createElement('div');
+    messageDiv.className = "text";
+    messageDiv.innerHTML = parts[1];
+    div.appendChild(timeDiv);
+    div.appendChild(messageDiv);
+    temp.prepend(div);
+    console.log("hola");
+    });
+    }
+    }
+
+    function StartTimer(){
+    setInterval(GetMessages,5000);
+    }
+    
+    document.addEventListener('DOMContentLoaded',
+    StartTimer, false);
+    
+    
+</script>  
+  
+</body>
+</html>
