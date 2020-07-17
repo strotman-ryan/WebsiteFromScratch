@@ -13,33 +13,39 @@ words = []
 times = []
 counter = 0
 
-def createServer():
-    try :
-        serversocket = FindPortDynamically()
-        serversocket.listen(5)
-        while(1): 
-            try:
-                (clientsocket, address) = serversocket.accept()
-            except Exception as e:
-                print("socket accept failed")
-                print(e)
-                continue
-            #TODO be able to receive large messages
-            rd = clientsocket.recv(5000).decode()
-            print(rd)
-            httpMessage = HttpMessage(rd)
-            httpMessage.Print()
-            data =  HandleMessage(httpMessage)
-            clientsocket.sendall(data.encode())
-            clientsocket.shutdown(SHUT_WR)
 
+#main function
+#sets up a socket then forever recieves a message then returns
+#to exit press the keyboard?
+def main():
+    try:
+        serversocket = FindPortDynamically()
+        try:
+            serversocket.listen(5)
+        except Exception as e :
+            print("Error: " + e)
+        while(1): 
+            HandleRequest(serversocket)
     except KeyboardInterrupt :
         print("\nShutting down...\n")
-    except Exception as exc :
-        print("Error:\n")
-        print(exc)
+    finally:
+        serversocket.close()
 
-    serversocket.close()
+#input <socket>: a socket that just stopped listening
+def HandleRequest(socket):
+    try:
+        (clientsocket, address) = socket.accept()
+    except Exception as e:
+        print("socket accept failed" + e)
+        return
+    #TODO be able to receive large messages
+    rawinput = clientsocket.recv(5000).decode()
+    httpMessage = HttpMessage(rawinput)
+    httpMessage.Print()
+    data = HandleMessage(httpMessage)
+    clientsocket.sendall(data.encode())
+    clientsocket.shutdown(SHUT_WR)
+
 
 def MakeStatus200():
     return "HTTP/1.1 200 OK" + new_line 
@@ -56,11 +62,28 @@ def MakeFile(filePath, counter):
     temp = Template(content)
     return temp.render(counter)
 
+#parses the httpMessage and makes a response
+#input <httpMessage> = type HttpMssage and contains all the request information
+#output <string> = the http response to send back
 def HandleMessage(httpMessage):
+    #first handle the path 
+    #splits the path into its parts
+    pathParts = httpMesage.path.split('/')[1::]
+    if pathParts[0] in ['','index']:
+        return ServeIndex(httpMessage)
+    
+
+    '''
     if httpMessage.command == "GET":
         return HandleGet(httpMessage)
     if httpMessage.command == "POST":
         return HandlePost(httpMessage)
+    return HandleCommandNotSupported(httpMessage)
+    '''
+
+#serves a request that is looking for index
+def ServeIndex(httpMessage):
+
 
 def HandleGet(httpMessage):
     paths = httpMessage.path.split('=')
@@ -96,7 +119,8 @@ def HandlePost(httpMessage):
     
 
 
-#port_num and server_ip are global variables
+#finds a port that is open and returns a binded socket
+#socket used Steam (TCP)
 def FindPortDynamically():
     try_port_num = port_num
     while(True):
@@ -111,8 +135,6 @@ def FindPortDynamically():
             try_port_num += 1
 
 
-createServer()
-
 
 if __name__ == "__main__":
-    createServer()
+    main()
