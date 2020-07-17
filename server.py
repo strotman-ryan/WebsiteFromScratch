@@ -4,6 +4,7 @@ from jinja2 import Template
 from datetime import datetime
 from HttpMessage import HttpMessage
 import urllib.parse
+import json
 
 server_ip = '192.168.1.4'
 port_num = 80
@@ -95,15 +96,21 @@ def ServeIndex(httpMessage):
 
 
 def ServeMessages(httpMessages):
-    #TODO make it so it only handles a get request
-    response = MakeStatus200()
-    response += MakeHeader()
-    messagesClientHas = int(httpMessages.urlArgs['numMessages'])
-    for time, word in zip(times[messagesClientHas::], words[messagesClientHas::]):
-        response += time + ',' + word + ';'
-    response += new_line
-    return response
-
+    if httpMessages.command == 'GET':
+        response = MakeStatus200()
+        response += MakeHeader()
+        #send json in the form [{'time': '12:35', "message":"hello"},{{'time': '1:35', "message":"good bye"}}]
+        messagesClientHas = int(httpMessages.urlArgs['numMessages'])
+        jsonToSend = []
+        for time, content in zip(times[messagesClientHas::], words[messagesClientHas::]):
+            message = {}
+            message["time"] = time
+            message["message"] = content
+            jsonToSend.append(message)
+        print(jsonToSend)
+        response += json.dumps(jsonToSend)
+        return response
+    #TODO throw error
 #finds a port that is open and returns a binded socket
 #socket used Steam (TCP)
 def FindPortDynamically():
