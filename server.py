@@ -68,56 +68,41 @@ def MakeFile(filePath, counter):
 def HandleMessage(httpMessage):
     #first handle the path 
     #splits the path into its parts
-    pathParts = httpMesage.path.split('/')[1::]
-    if pathParts[0] in ['','index']:
+    pathRoutes = httpMessage.pathRoutes
+    if pathRoutes[0] in ['','index','favicon.ico']:
         return ServeIndex(httpMessage)
-    
-
-    '''
-    if httpMessage.command == "GET":
-        return HandleGet(httpMessage)
-    if httpMessage.command == "POST":
-        return HandlePost(httpMessage)
-    return HandleCommandNotSupported(httpMessage)
-    '''
+    if pathRoutes[0] in ['messages']:
+        return ServeMessages(httpMessage)
+    #TODO send 403 error message
 
 #serves a request that is looking for index
 def ServeIndex(httpMessage):
+    if httpMessage.command == 'GET':
+        response = MakeStatus200()
+        response += MakeHeader()
+        response += MakeFile("main.html",{'counter':counter,'messages':zip(times[::-1],words[::-1])})
+        response += new_line
+        return response
+    if httpMessage.command == 'POST':
+        bodyArray = httpMessage.body.split('=')
+        message = bodyArray[1]
+        message = urllib.parse.unquote_plus(message)
+        words.append(message)
+        times.append(str(datetime.now()))
+        response = "HTTP/1.1 303 See Other" + new_line
+        response += "Location: " + "/index" + new_line
+        return response
 
 
-def HandleGet(httpMessage):
-    paths = httpMessage.path.split('=')
-    if len(paths) == 2:
-        return GetMessages(int(paths[1]))
+def ServeMessages(httpMessages):
+    #TODO make it so it only handles a get request
     response = MakeStatus200()
     response += MakeHeader()
-    response += MakeFile("main.html",{'counter':counter,'messages':zip(times[::-1],words[::-1])})
-    response += new_line
-    return response
-
-def GetMessages(messagesClientHas):
-    response = MakeStatus200()
-    response += MakeHeader()
-    print("1")
+    messagesClientHas = int(httpMessages.urlArgs['numMessages'])
     for time, word in zip(times[messagesClientHas::], words[messagesClientHas::]):
         response += time + ',' + word + ';'
-    print("2")
     response += new_line
-    print("3")
     return response
-    
-def HandlePost(httpMessage):
-    bodyArray =httpMessage.body.split('=')
-    message = bodyArray[1]
-    message = urllib.parse.unquote_plus(message)
-    words.append(message)
-    times.append(str(datetime.now()))
-
-    response = "HTTP/1.1 303 See Other" + new_line
-    response += "Location: " + "/" + new_line
-    return response
-    
-
 
 #finds a port that is open and returns a binded socket
 #socket used Steam (TCP)

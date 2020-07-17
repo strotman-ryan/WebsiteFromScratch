@@ -2,6 +2,16 @@
 
 
 class HttpMessage:
+    '''
+    These are the members
+    command<string> -> 'GET', 'POST' //TODO change this to method
+    path<string> -> the full url path sent in the request
+    pathRoutes<list[string]> -> the route the url is on; ex "/hello/what?cool=ex&three=5" -> ['hello','what']
+    urlArgs<dictionary{string, string}> -> the argument in the url; ex "/hello/what?cool=ex&three=5" -> {'cool':'ex','three':'5'}
+    version<string> -> the http version number
+    headers<dictionary{string}> -> all the headers in a dictionary
+    body<string> -> the whole body
+    '''
 
     #will parse httpMessage
     #httpMessage is a string of the whole message
@@ -11,6 +21,14 @@ class HttpMessage:
         firstLine = lines[0].split(' ')
         self.command = firstLine[0]
         self.path = firstLine[1]
+        pathParts = self.path.split('?')
+        self.pathRoutes = pathParts[0].split('/')[1::]
+        self.urlArgs = {}
+        if(len(pathParts) > 1):
+            args = pathParts[1].split('&')
+            for arg in args:
+                argKeyValue = arg.split('=')
+                self.urlArgs[argKeyValue[0]] = argKeyValue[1]
         self.version = firstLine[2]
         #parse headers
         self.headers = {}
@@ -31,6 +49,10 @@ class HttpMessage:
         print('----------http message----------------')
         print('command: ' + self.command)
         print('path: ' + self.path)
+        print('pathRoute: ')
+        print(self.pathRoutes)
+        print('urlArgs: ')
+        print(self.urlArgs)
         print('version: ' + self.version)
         print('--headers--')
         for key, value in self.headers.items():
