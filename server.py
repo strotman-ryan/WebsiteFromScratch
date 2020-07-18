@@ -41,7 +41,8 @@ def HandleRequest(socket):
         return
     #TODO be able to receive large messages
     rawinput = clientsocket.recv(5000).decode()
-    httpMessage = HttpMessage(rawinput)
+    print(rawinput)
+    httpMessage = HttpMessage(rawinput, clientsocket)
     httpMessage.Print()
     data = HandleMessage(httpMessage)
     clientsocket.sendall(data.encode())

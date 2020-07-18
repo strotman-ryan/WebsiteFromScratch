@@ -15,7 +15,8 @@ class HttpMessage:
 
     #will parse httpMessage
     #httpMessage is a string of the whole message
-    def __init__(self, httpMessage):
+    def __init__(self, httpMessage, socket):
+        print("bytes received: " + str(len(httpMessage)) + "\n")
         lines = httpMessage.split('\n')
         #parse first line
         firstLine = lines[0].split(' ')
@@ -39,10 +40,26 @@ class HttpMessage:
                 lineMarker = i + 1
                 break 
             header = lines[i].split(":") 
-            self.headers[header[0]] = header[1]
-            
+            #make all headers fields lower case since headers are case insensitive
+            self.headers[header[0].lower()] = header[1]
+        print("\nsize of body: " + str( len(''.join(lines[lineMarker:])))+ "\n")
+        bytesLeftToRead = ''.join(lines[lineMarker:])
+        #get the number of bytes to be in body
+        sizeOfBody = 0
+        if "content-length" in self.headers.keys():
+            sizeOfBody = int(self.headers["content-length"])
+        
+        bytesLeftToBeSent = sizeOfBody - len(bytesLeftToRead)
+        while bytesLeftToBeSent > 0:
+            newBytes = socket.recv(bytesLeftToBeSent).decode()
+            print("Read " + str(len(newBytes)) + " bytes")
+            bytesLeftToBeSent -= len(newBytes)
+            bytesLeftToRead += newBytes
+        #make sure all of the body is read
+        
+        print("bytes left to read " + bytesLeftToRead)
         #parse body
-        self.body = ''.join(lines[lineMarker:])
+        self.body = bytesLeftToRead
 
 
     def Print(self):
