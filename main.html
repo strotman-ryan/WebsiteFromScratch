@@ -26,8 +26,6 @@
     <label for="message">Add a message:</label><br>
     <input type="text" id="message" name="Message" value=""><br><br>
     <input type="submit" value="Submit">
-    <label for="ss">add your social</label>
-    <input type="number" id="ss" name="ss" value="69"/>
   </form> 
 
   <div id="allMessages">
@@ -57,26 +55,21 @@
         console.log(this.responseText);
         if(!this.responseText.includes(','))
           return;
-
-        var messages = this.responseText.split(";")
-        console.log("1")
-        messages.slice(0,-1).forEach(function(item,index){
-          var parts = item.split(",")
-          console.log(parts)
+        jsonObj = JSON.parse(this.responseText);
+        for(var i = 0; i < jsonObj.length; i++){
           var temp = document.getElementById("allMessages");
           var div = document.createElement('div');
           div.className = "message";
           var timeDiv = document.createElement('div');
           timeDiv.className = "time";
-          timeDiv.innerHTML = parts[0];
+          timeDiv.innerHTML = jsonObj[i]['time'];
           var messageDiv = document.createElement('div');
           messageDiv.className = "text";
-          messageDiv.innerHTML = parts[1];
+          messageDiv.innerHTML = jsonObj[i]['message']
           div.appendChild(timeDiv);
           div.appendChild(messageDiv);
           temp.prepend(div);
-          console.log("hola");
-        });
+        }
       }
     }
 
