@@ -39,10 +39,7 @@ def HandleRequest(socket):
     except Exception as e:
         print("socket accept failed" + e)
         return
-    #TODO be able to receive large messages
-    rawinput = clientsocket.recv(5000).decode()
-    print(rawinput)
-    httpMessage = HttpMessage(rawinput, clientsocket)
+    httpMessage = HttpMessage(clientsocket)
     httpMessage.Print()
     data = HandleMessage(httpMessage)
     clientsocket.sendall(data.encode())
@@ -112,6 +109,8 @@ def ServeMessages(httpMessages):
         response += json.dumps(jsonToSend)
         return response
     #TODO throw error
+
+    
 #finds a port that is open and returns a binded socket
 #socket used Steam (TCP)
 def FindPortDynamically():

@@ -2,6 +2,10 @@
 
 
 class HttpMessage:
+
+    #conuted as a memeber of the class
+    new_line = "\r\n"
+
     '''
     These are the members
     command<string> -> 'GET', 'POST' //TODO change this to method
@@ -14,14 +18,49 @@ class HttpMessage:
     '''
 
     #will parse httpMessage
-    #httpMessage is a string of the whole message
-    def __init__(self, httpMessage, socket):
-        print("bytes received: " + str(len(httpMessage)) + "\n")
-        lines = httpMessage.split('\n')
+    #socket is a recently connected socket
+    def __init__(self, socket):
+        #TODO be able to receive large messages
+        rawinput = socket.recv(5000).decode()
+        print("bytes received: " + str(len(rawinput)) + "\n")
+        lines = rawinput.split(self.new_line)
+        self.ParseFirstLine(lines[0])
+        #parse headers
+        headersLastLine = lines.index("")
+        self.ParseHeaders(lines[1:headersLastLine])
+        self.ParseBody(socket, lines[headersLastLine +1 ::])
+        
+        
+    '''
+    Parse the body of the request
+    socket <socket> -> the socket connected to the client
+    linesLeft <list<string>> the lines that havent been read yet; may be empty
+    '''
+    def ParseBody(self, socket, linesLeft):
+        #could have an issue since I am not join back with newline
+        self.body = ''.join(linesLeft)
+        print("Number of bytes in body init read: " + str(len(self.body)))
+        sizeOfBody = 0
+        contentLenthHeader = "content-length"
+        if contentLenthHeader in self.headers.keys():
+            sizeOfBody = int(self.headers[contentLenthHeader])
+
+        bytesLeftToBeSent = sizeOfBody - len(self.body)
+        while bytesLeftToBeSent > 0:
+            newBytes = socket.recv(bytesLeftToBeSent).decode()
+            print("Read " + str(len(newBytes)) + " bytes")
+            bytesLeftToBeSent -= len(newBytes)
+            self.body += newBytes
+        
+
+    '''
+    First line is a string representing the first line received from client
+    '''
+    def ParseFirstLine(self, firstLine):
         #parse first line
-        firstLine = lines[0].split(' ')
-        self.command = firstLine[0]
-        self.path = firstLine[1]
+        firstLineParts = firstLine.split(' ')
+        self.command = firstLineParts[0]
+        self.path = firstLineParts[1]
         pathParts = self.path.split('?')
         self.pathRoutes = pathParts[0].split('/')[1::]
         self.urlArgs = {}
@@ -30,36 +69,18 @@ class HttpMessage:
             for arg in args:
                 argKeyValue = arg.split('=')
                 self.urlArgs[argKeyValue[0]] = argKeyValue[1]
-        self.version = firstLine[2]
-        #parse headers
+        self.version = firstLineParts[2]
+
+    '''
+    parses the headers into a dictionary
+    headerList <list<string>> -> the headers
+    '''
+    def ParseHeaders(self,headerList):
         self.headers = {}
-        lineMarker = 0
-        for i in range(1,len(lines)):
-            #check if end of header section
-            if lines[i] == "\r":
-                lineMarker = i + 1
-                break 
-            header = lines[i].split(":") 
+        for i in range(len(headerList)):
+            header = headerList[i].split(":") 
             #make all headers fields lower case since headers are case insensitive
             self.headers[header[0].lower()] = header[1]
-        print("\nsize of body: " + str( len(''.join(lines[lineMarker:])))+ "\n")
-        bytesLeftToRead = ''.join(lines[lineMarker:])
-        #get the number of bytes to be in body
-        sizeOfBody = 0
-        if "content-length" in self.headers.keys():
-            sizeOfBody = int(self.headers["content-length"])
-        
-        bytesLeftToBeSent = sizeOfBody - len(bytesLeftToRead)
-        while bytesLeftToBeSent > 0:
-            newBytes = socket.recv(bytesLeftToBeSent).decode()
-            print("Read " + str(len(newBytes)) + " bytes")
-            bytesLeftToBeSent -= len(newBytes)
-            bytesLeftToRead += newBytes
-        #make sure all of the body is read
-        
-        print("bytes left to read " + bytesLeftToRead)
-        #parse body
-        self.body = bytesLeftToRead
 
 
     def Print(self):
