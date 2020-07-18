@@ -3,6 +3,7 @@ from socket import *
 from jinja2 import Template
 from datetime import datetime
 from HttpMessage import HttpMessage
+from Network import Network
 import urllib.parse
 import json
 
@@ -20,28 +21,29 @@ counter = 0
 #to exit press the keyboard?
 def main():
     try:
-        serversocket = FindPortDynamically()
+        network = Network()
+        serversocket = network.serversocket
         try:
             serversocket.listen(5)
         except Exception as e :
             print("Error: " + e)
         while(1): 
-            HandleRequest(serversocket)
+            HandleRequest(network)
     except KeyboardInterrupt :
         print("\nShutting down...\n")
     finally:
         serversocket.close()
 
 #input <socket>: a socket that just stopped listening
-def HandleRequest(socket):
+def HandleRequest(network):
     try:
-        (clientsocket, address) = socket.accept()
+        (clientsocket, address) = network.serversocket.accept()
     except Exception as e:
         print("socket accept failed" + e)
         return
     httpMessage = HttpMessage(clientsocket)
     httpMessage.Print()
-    data = HandleMessage(httpMessage)
+    data = HandleMessage(httpMessage, network)
     clientsocket.sendall(data.encode())
     clientsocket.shutdown(SHUT_WR)
 
@@ -64,22 +66,26 @@ def MakeFile(filePath, counter):
 #parses the httpMessage and makes a response
 #input <httpMessage> = type HttpMssage and contains all the request information
 #output <string> = the http response to send back
-def HandleMessage(httpMessage):
+def HandleMessage(httpMessage, network):
     #first handle the path 
     #splits the path into its parts
     pathRoutes = httpMessage.pathRoutes
     if pathRoutes[0] in ['','index','favicon.ico']:
-        return ServeIndex(httpMessage)
+        return ServeIndex(httpMessage, network)
     if pathRoutes[0] in ['messages']:
         return ServeMessages(httpMessage)
     #TODO send 403 error message
 
 #serves a request that is looking for index
-def ServeIndex(httpMessage):
+def ServeIndex(httpMessage,network):
     if httpMessage.command == 'GET':
         response = MakeStatus200()
         response += MakeHeader()
-        response += MakeFile("main.html",{'counter':counter,'messages':zip(times[::-1],words[::-1])})
+        response += MakeFile("main.html",
+            {'counter':counter,
+            'messages':zip(times[::-1],words[::-1]),
+            "ipAddress":network.server_ip,
+            "portNum": network.port_num})
         response += new_line
         return response
     if httpMessage.command == 'POST':
@@ -110,21 +116,8 @@ def ServeMessages(httpMessages):
         return response
     #TODO throw error
 
-    
-#finds a port that is open and returns a binded socket
-#socket used Steam (TCP)
-def FindPortDynamically():
-    try_port_num = port_num
-    while(True):
-        try:
-            serversocket = socket(AF_INET, SOCK_STREAM)
-            serversocket.bind((server_ip,try_port_num)) # this is the line that fails
-            print('Access http://' + server_ip + ':' + str(try_port_num))
-            return serversocket
-        except Exception as exc :
-            print("Error Finding port " +str(try_port_num) +":\n")
-            print(exc)
-            try_port_num += 1
+
+
 
 
 

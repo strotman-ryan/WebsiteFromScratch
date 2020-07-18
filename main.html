@@ -39,7 +39,11 @@
 
   <button onclick="loadDoc()">Click me</button>
   <script>
-
+    var ip = "{{ipAddress}}"
+    console.log(ip)
+    var uri = "ws://" + "{{ipAddress}}" + ':' + "{{portNum}}" + "/";
+    console.log(uri);
+    var ws = new WebSocket(uri);
     function GetMessages() {
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = GotUpdate;
