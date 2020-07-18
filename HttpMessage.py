@@ -80,7 +80,7 @@ class HttpMessage:
         for i in range(len(headerList)):
             header = headerList[i].split(":") 
             #make all headers fields lower case since headers are case insensitive
-            self.headers[header[0].lower()] = header[1]
+            self.headers[header[0].lower()] = ':'.join(header[1::])
 
 
     def Print(self):

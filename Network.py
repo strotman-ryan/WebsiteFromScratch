@@ -6,8 +6,8 @@ contains the information for the ip and port
 '''
 class Network:
 
-    server_ip = '192.168.1.4'
-    port_num = 80
+    server_ip = '127.0.0.1'
+    port_num = 1024
     
     def __init__(self):
         self.FindPortDynamically()

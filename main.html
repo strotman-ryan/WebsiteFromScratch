@@ -22,11 +22,16 @@
   }
 </style>
 <body>
+  <!--
   <form action="/" method="POST">
     <label for="message">Add a message:</label><br>
     <input type="text" id="message" name="Message" value=""><br><br>
     <input type="submit" value="Submit">
-  </form> 
+  </form> -->
+  <label>Add a message:</label><br>
+  <input type="text" id="message" value=""><br>
+  <br>
+  <button name="submit" onclick="SendMessage()">Submit</button>
 
   <div id="allMessages">
   {% for time, message in messages  %}
@@ -37,29 +42,16 @@
   {% endfor %}
   </div>
 
-  <button onclick="loadDoc()">Click me</button>
   <script>
-    var ip = "{{ipAddress}}"
-    console.log(ip)
-    var uri = "ws://" + "{{ipAddress}}" + ':' + "{{portNum}}" + "/";
+
+    //var uri = "ws://" + "{{ipAddress}}" + ':' + "{{portNum}}" + "/";
+    var uri = "ws://127.0.0.1:1025/";
     console.log(uri);
     var ws = new WebSocket(uri);
-    function GetMessages() {
-      var xhttp = new XMLHttpRequest();
-      xhttp.onreadystatechange = GotUpdate;
-      messages = document.getElementById("allMessages");
-      numChildren = messages.children.length;
-      xhttp.open("GET", "/messages?numMessages=" + numChildren, true);
-      xhttp.send();
-      console.log("sent message");
-    }
 
-    function GotUpdate(){
-      if (this.readyState == 4 && this.status == 200) {
-        console.log(this.responseText);
-        if(!this.responseText.includes(','))
-          return;
-        jsonObj = JSON.parse(this.responseText);
+    ws.onmessage = function (e){
+      console.log(e.data)
+      jsonObj = JSON.parse(e.data);
         for(var i = 0; i < jsonObj.length; i++){
           var temp = document.getElementById("allMessages");
           var div = document.createElement('div');
@@ -74,14 +66,15 @@
           div.appendChild(messageDiv);
           temp.prepend(div);
         }
-      }
     }
 
-    function StartTimer(){
-    setInterval(GetMessages,5000);
+    function SendMessage(){
+      var message = document.getElementById('message').value
+      console.log(message)
+      message.value = "";
+      ws.send(message);
     }
-    
-    document.addEventListener('DOMContentLoaded', StartTimer, false);
+
 </script>  
   
 </body>
