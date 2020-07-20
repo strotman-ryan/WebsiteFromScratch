@@ -16,7 +16,9 @@ from Messages import Messages
 def main():
     messages = Messages()
     httpThread = Server(messages)
-    webSocketThread = WebSocketServer(messages)
+    ipAddress = httpThread.network.server_ip
+    portNum = httpThread.network.port_num + 1
+    webSocketThread = WebSocketServer(messages, ipAddress, portNum)
 
     webSocketThread.start()
     httpThread.start()

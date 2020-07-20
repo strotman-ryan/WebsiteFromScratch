@@ -22,12 +22,6 @@
   }
 </style>
 <body>
-  <!--
-  <form action="/" method="POST">
-    <label for="message">Add a message:</label><br>
-    <input type="text" id="message" name="Message" value=""><br><br>
-    <input type="submit" value="Submit">
-  </form> -->
   <label>Add a message:</label><br>
   <input type="text" id="message" value=""><br>
   <br>
@@ -44,8 +38,8 @@
 
   <script>
 
-    //var uri = "ws://" + "{{ipAddress}}" + ':' + "{{portNum}}" + "/";
-    var uri = "ws://127.0.0.1:1025/";
+    var uri = "ws://" + "{{ipAddress}}" + ':' + "{{portNum}}" + "/";
+    //var uri = "ws://127.0.0.1:1025/";
     console.log(uri);
     var ws = new WebSocket(uri);
 
