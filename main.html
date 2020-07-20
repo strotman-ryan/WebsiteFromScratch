@@ -39,7 +39,6 @@
   <script>
 
     var uri = "ws://" + "{{ipAddress}}" + ':' + "{{portNum}}" + "/";
-    //var uri = "ws://127.0.0.1:1025/";
     console.log(uri);
     var ws = new WebSocket(uri);
 
@@ -63,9 +62,10 @@
     }
 
     function SendMessage(){
-      var message = document.getElementById('message').value
+      var messageObj = document.getElementById('message')
+      var message = messageObj.value
       console.log(message)
-      message.value = "";
+      messageObj.value = "";
       ws.send(message);
     }
 
