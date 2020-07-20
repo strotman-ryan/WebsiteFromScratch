@@ -12,13 +12,13 @@ Creates a shared object
 from Server import Server
 from WebSocketServer import WebSocketServer
 from Messages import Messages
+from Network import Network
 
 def main():
     messages = Messages()
-    httpThread = Server(messages)
-    ipAddress = httpThread.network.server_ip
-    portNum = httpThread.network.port_num + 1
-    webSocketThread = WebSocketServer(messages, ipAddress, portNum)
+    network = Network()
+    httpThread = Server(messages, network)
+    webSocketThread = WebSocketServer(messages, network)
 
     webSocketThread.start()
     httpThread.start()

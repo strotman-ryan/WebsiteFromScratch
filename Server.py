@@ -14,10 +14,10 @@ new_line = "\r\n"
 
 class Server(threading.Thread):
 
-    def __init__(self, messages):
+    def __init__(self, messages, network):
         self.messages = messages
         threading.Thread.__init__(self)
-        self.network = Network()
+        self.network = network
 
         
         
@@ -85,8 +85,8 @@ class Server(threading.Thread):
             messages, dateTime = self.messages.GetAllMessages()
             response += self.MakeFile("main.html",
                 {'messages':zip(dateTime[::-1],messages[::-1]),
-                "ipAddress":self.network.server_ip,
-                "portNum": self.network.port_num + 1}) #port address for sebsocket server
+                "ipAddress":self.network.ServerIp,
+                "portNum": self.network.WebsocketPortNum}) #port address for sebsocket server
             response += new_line
             return response
 

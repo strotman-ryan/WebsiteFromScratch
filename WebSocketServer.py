@@ -21,10 +21,9 @@ for time, content in zip(times[messagesClientHas::], words[messagesClientHas::])
 
 class WebSocketServer(threading.Thread):
 
-    def __init__(self, messages, ipAddress, portNum):
-        self.ipAddress = ipAddress
-        self.portNum = portNum
+    def __init__(self, messages, network):
         self.messages = messages
+        self.network = network
         self.users = set()   #all the websockets currently open
         threading.Thread.__init__(self)
         print("started websocket server")
@@ -36,7 +35,15 @@ class WebSocketServer(threading.Thread):
     def run(self):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        start_server = websockets.serve(self.handleMessages, self.ipAddress,self.portNum)
+        while(True):
+            try:
+                start_server = websockets.serve(self.handleMessages, self.network.ServerIp,self.network.WebsocketPortNum)
+                #break if no error
+                break
+            except Exception as exc :
+                self.network.WebsocketPortNum += 1
+                print("Port failed to open for websockets")
+                print(exc)
         loop.run_until_complete(start_server)
         loop.run_forever()
 

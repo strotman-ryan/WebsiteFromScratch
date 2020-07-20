@@ -7,24 +7,26 @@ contains the information for the ip and port
 class Network:
 
     #members of the class
-    server_ip = '192.168.1.4'
-    port_num = 1024
+    ServerIp = '192.168.1.4'
+    ServerPortNum = 1024
+
     
     def __init__(self):
-        self.FindPortDynamically()
+        self.WebsocketPortNum = 0
+        self.FindHttpServerPortDynamically()
+        pass
 
 
-    #finds a port that is open and returns a binded socket
-    #socket used Steam (TCP)
-    def FindPortDynamically(self):
+    #opens a socket on an open port for the http server
+    def FindHttpServerPortDynamically(self):
         while(True):
             try:
                 self.serversocket = socket(AF_INET, SOCK_STREAM)
-                self.serversocket.bind((self.server_ip,self.port_num)) # this is the line that fails
-                print('Access http://' + self.server_ip + ':' + str(self.port_num))
+                self.serversocket.bind((self.ServerIp,self.ServerPortNum)) # this is the line that fails
+                self.WebsocketPortNum = self.ServerPortNum + 1
+                print('Access http://' + self.ServerIp + ':' + str(self.ServerPortNum))
                 return
             except Exception as exc :
-                print("Error Finding port " +str(self.port_num) +":\n")
+                print("Error Finding port " +str(self.ServerPortNum) +":\n")
                 print(exc)
-                self.port_num += 1
-    
+                self.ServerPortNum += 1
