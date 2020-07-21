@@ -9,7 +9,7 @@ Creates a shared object
         - thread safe getters and setters
 '''
 
-from Server import Server
+from HttpServer import HttpServer
 from WebSocketServer import WebSocketServer
 from Messages import Messages
 from Network import Network
@@ -17,7 +17,7 @@ from Network import Network
 def main():
     messages = Messages()
     network = Network()
-    httpThread = Server(messages, network)
+    httpThread = HttpServer(messages, network)
     webSocketThread = WebSocketServer(messages, network)
 
     webSocketThread.start()

@@ -7,18 +7,6 @@ import asyncio
 import websockets
 from datetime import datetime
 
-#TODO delete or use this
-'''
-message = urllib.parse.unquote_plus(message)
-
-jsonToSend = []
-for time, content in zip(times[messagesClientHas::], words[messagesClientHas::]):
-    message = {}
-    message["time"] = time
-    message["message"] = content
-    jsonToSend.append(message)
-'''
-
 class WebSocketServer(threading.Thread):
 
     def __init__(self, messages, network):
@@ -26,26 +14,32 @@ class WebSocketServer(threading.Thread):
         self.network = network
         self.users = set()   #all the websockets currently open
         threading.Thread.__init__(self)
+        self.setUpServer()
         print("started websocket server")
 
 
     '''
-    the main function that will set up the websockets and send and receive
+    finds the next open port for the websocket and sets it up
     '''
-    def run(self):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+    def setUpServer(self):
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
         while(True):
             try:
-                start_server = websockets.serve(self.handleMessages, self.network.ServerIp,self.network.WebsocketPortNum)
+                self.start_server = websockets.serve(self.handleMessages, self.network.ServerIp,self.network.WebsocketPortNum)
                 #break if no error
                 break
             except Exception as exc :
                 self.network.WebsocketPortNum += 1
                 print("Port failed to open for websockets")
                 print(exc)
-        loop.run_until_complete(start_server)
-        loop.run_forever()
+
+    '''
+    the main function that starts the websocket
+    '''
+    def run(self):
+        self.loop.run_until_complete(self.start_server)
+        self.loop.run_forever()
 
     async def register(self, socket):
         self.users.add(socket)

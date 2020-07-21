@@ -1,5 +1,5 @@
 
-from socket import *
+from socket import SHUT_WR
 from jinja2 import Template
 from datetime import datetime
 from HttpMessage import HttpMessage
@@ -8,11 +8,9 @@ import urllib.parse
 import json
 import threading 
 
-server_ip = '127.0.0.1'
-port_num = 1024
 new_line = "\r\n"
 
-class Server(threading.Thread):
+class HttpServer(threading.Thread):
 
     def __init__(self, messages, network):
         self.messages = messages
@@ -83,7 +81,7 @@ class Server(threading.Thread):
             response = self.MakeStatus200()
             response += self.MakeHeader()
             messages, dateTime = self.messages.GetAllMessages()
-            response += self.MakeFile("main.html",
+            response += self.MakeFile("Views/main.html",
                 {'messages':zip(dateTime[::-1],messages[::-1]),
                 "ipAddress":self.network.ServerIp,
                 "portNum": self.network.WebsocketPortNum}) #port address for sebsocket server

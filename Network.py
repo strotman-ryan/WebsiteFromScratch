@@ -1,5 +1,5 @@
 
-from socket import *
+from socket import AF_INET, socket, SOCK_STREAM
 
 '''
 contains the information for the ip and port
