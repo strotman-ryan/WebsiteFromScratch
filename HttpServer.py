@@ -55,8 +55,11 @@ class HttpServer(threading.Thread):
         #first handle the path 
         #splits the path into its parts
         pathRoutes = httpMessage.pathRoutes
-        if pathRoutes[0] in ['','index','favicon.ico']:
+        if pathRoutes[0] in ['main','favicon.ico']:
             return self.ServeIndex(httpMessage)
+        else:
+            #default go to login screen
+            return self.ServeLoginPage(httpMessage)
         #TODO send 403 error message
 
     #serves a request that is looking for index
@@ -73,4 +76,18 @@ class HttpServer(threading.Thread):
             response += HttpResponseBuilder.newline
             return response
 
+    def ServeLoginPage(self, httpMessage):
+        if httpMessage.command == 'GET':
+            response = HttpResponseBuilder.MakeStatus200()
+            response += HttpResponseBuilder.MakeGenericHeader()
+            response += HttpResponseBuilder.MakeFile("Views/login.html", {})
+            response += HttpResponseBuilder.newline
+            return response
+        if httpMessage.command == 'POST':
+            #check to make sure password is good
+            #make token for user
+            #redirect to main page
+            response = "HTTP/1.1 303 See Other" + HttpResponseBuilder.newline
+            response += "Location: " + "/main" + HttpResponseBuilder.newline
+            return response
 
