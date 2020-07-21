@@ -1,14 +1,12 @@
 
 from socket import SHUT_WR
-from jinja2 import Template
+from HttpResponseBuilder import HttpResponseBuilder
 from datetime import datetime
 from HttpMessage import HttpMessage
 from Network import Network
 import urllib.parse
 import json
 import threading 
-
-new_line = "\r\n"
 
 class HttpServer(threading.Thread):
 
@@ -49,20 +47,6 @@ class HttpServer(threading.Thread):
         clientsocket.shutdown(SHUT_WR)
 
 
-    def MakeStatus200(self):
-        return "HTTP/1.1 200 OK" + new_line 
-
-    def MakeHeader(self):
-        header = "Content-Type: text/html; charset=utf-8" + new_line
-        header += new_line 
-        return header
-
-    def MakeFile(self,filePath, counter):
-        file = open(filePath, "r")
-        content = file.read()
-        file.close()
-        temp = Template(content)
-        return temp.render(counter)
 
     #parses the httpMessage and makes a response
     #input <httpMessage> = type HttpMssage and contains all the request information
@@ -78,14 +62,15 @@ class HttpServer(threading.Thread):
     #serves a request that is looking for index
     def ServeIndex(self, httpMessage):
         if httpMessage.command == 'GET':
-            response = self.MakeStatus200()
-            response += self.MakeHeader()
+            response = HttpResponseBuilder.MakeStatus200()
+            response += HttpResponseBuilder.MakeGenericHeader()
             messages, dateTime = self.messages.GetAllMessages()
-            response += self.MakeFile("Views/main.html",
-                {'messages':zip(dateTime[::-1],messages[::-1]),
-                "ipAddress":self.network.ServerIp,
-                "portNum": self.network.WebsocketPortNum}) #port address for sebsocket server
-            response += new_line
+            params = {}
+            params['messages'] = zip(dateTime[::-1],messages[::-1])
+            params['ipAddress'] = self.network.ServerIp
+            params['portNum'] = self.network.WebsocketPortNum
+            response += HttpResponseBuilder.MakeFile("Views/main.html", params)
+            response += HttpResponseBuilder.newline
             return response
 
 
