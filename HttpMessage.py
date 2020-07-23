@@ -13,7 +13,7 @@ class HttpMessage:
     pathRoutes<list[string]> -> the route the url is on; ex "/hello/what?cool=ex&three=5" -> ['hello','what']
     urlArgs<dictionary{string, string}> -> the argument in the url; ex "/hello/what?cool=ex&three=5" -> {'cool':'ex','three':'5'}
     version<string> -> the http version number
-    headers<dictionary{string}> -> all the headers in a dictionary
+    headers<dictionary{string, string}> -> all the headers in a dictionary
     body<string> -> the whole body
     '''
 

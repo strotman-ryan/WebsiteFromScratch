@@ -16,7 +16,6 @@ class HttpServer(threading.Thread):
         self.network = network
 
         
-        
     #main function
     #sets up a socket then forever recieves a message then returns
     #to exit press the keyboard?
