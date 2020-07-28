@@ -7,7 +7,8 @@ contains the information for the ip and port
 class Network:
 
     #members of the class
-    ServerIp = '192.168.1.4'
+    ServerIp = '192.168.1.197'
+    
     ServerPortNum = 1024
 
     
