@@ -86,7 +86,14 @@ class HttpServer(threading.Thread):
             #check to make sure password is good
             #make token for user
             #redirect to main page
+            info = httpMessage.body.split("&")
+            userName = info[0].split('=')[1]
+            password = info[1].split('=')[1]
+            print("User name is: "  +userName)
+
             response = "HTTP/1.1 303 See Other" + HttpResponseBuilder.newline
             response += "Location: " + "/main" + HttpResponseBuilder.newline
+            response += HttpResponseBuilder.AddCookieHeader("password",password)
+            response += HttpResponseBuilder.AddCookieHeader("userName", userName)
             return response
 

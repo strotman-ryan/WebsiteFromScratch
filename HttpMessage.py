@@ -14,6 +14,7 @@ class HttpMessage:
     urlArgs<dictionary{string, string}> -> the argument in the url; ex "/hello/what?cool=ex&three=5" -> {'cool':'ex','three':'5'}
     version<string> -> the http version number
     headers<dictionary{string, string}> -> all the headers in a dictionary
+    cookies<dictionary{string, string}> -> all cookies sent over
     body<string> -> the whole body
     '''
 
@@ -81,6 +82,19 @@ class HttpMessage:
             header = headerList[i].split(":") 
             #make all headers fields lower case since headers are case insensitive
             self.headers[header[0].lower()] = ':'.join(header[1::])
+        self.ParseCookies()
+
+    '''
+    Looks for cookes and populates the cookie member if there are anh
+    '''
+    def ParseCookies(self):
+        self.cookies = {}
+        if "cookie" in self.headers:
+            cookies = self.headers["cookie"].split(";")
+            for cookie in cookies:
+                cookieParts = cookie.strip().split("=")
+                self.cookies[cookieParts[0]] = cookieParts[1]
+
 
 
     def Print(self):
@@ -95,5 +109,8 @@ class HttpMessage:
         print('--headers--')
         for key, value in self.headers.items():
             print(key + ": " + value)
+        print('--cookies--')
+        for key, value in self.cookies.items():
+            print(key + " = " + value)
         print('--body--')
         print(self.body)

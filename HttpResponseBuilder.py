@@ -55,3 +55,10 @@ class HttpResponseBuilder:
         file.close()
         temp = Template(content)
         return temp.render(params)
+
+    '''
+    adds a set cookie header with the cookie name and value
+    '''
+    @staticmethod
+    def AddCookieHeader(cookieName, cookieValue):
+        return HttpResponseBuilder.AddHeader("Set-Cookie", cookieName + "=" + cookieValue)
