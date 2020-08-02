@@ -8,7 +8,12 @@ from Network import Network
 import urllib.parse
 import json
 import threading 
+import time
+import jwt
+from TokenAuthentication import TokenAuthentication
 
+
+seceretKey = "This seceret string chang later"
 
 class HttpServer(threading.Thread):
 
@@ -24,7 +29,7 @@ class HttpServer(threading.Thread):
     def run(self):
         try:
             try:
-                self.network.serversocket.listen(5)
+                self.network.serversocket.listen(10)
             except Exception as e :
                 print("Error: " + e)
             while(1): 
@@ -38,6 +43,7 @@ class HttpServer(threading.Thread):
     def HandleRequest(self):
         try:
             (clientsocket, address) = self.network.serversocket.accept()
+            print(address)
         except Exception as e:
             print("socket accept failed" + e)
             return
@@ -66,16 +72,29 @@ class HttpServer(threading.Thread):
     #serves a request that is looking for index
     def ServeIndex(self, httpMessage):
         if httpMessage.command == 'GET':
-            response = HttpResponseBuilder.MakeStatus200()
-            response += HttpResponseBuilder.MakeGenericHeader()
-            messages, dateTime = self.messages.GetAllMessages()
-            params = {}
-            params['messages'] = zip(dateTime[::-1],messages[::-1])
-            params['ipAddress'] = self.network.ServerIp
-            params['portNum'] = self.network.WebsocketPortNum
-            response += HttpResponseBuilder.MakeFile("Views/main.html", params)
-            response += HttpResponseBuilder.newline
-            return response
+            #Check for valid token
+            if "Token" in httpMessage.cookies:
+                encodedToken = httpMessage.cookies["Token"]
+                valid, decodedToken = TokenAuthentication.DecodeToken(encodedToken)
+                if not valid:
+                    return self.ServeLoginPage()
+
+                print("The user is " + decodedToken["UserName"])
+                response = HttpResponseBuilder.MakeStatus200()
+                response += HttpResponseBuilder.MakeGenericHeader()
+                messages, dateTime = self.messages.GetAllMessages()
+                params = {}
+                params['messages'] = zip(dateTime[::-1],messages[::-1])
+                params['ipAddress'] = self.network.ServerIp
+                params['portNum'] = self.network.WebsocketPortNum
+                response += HttpResponseBuilder.MakeFile("Views/main.html", params)
+                response += HttpResponseBuilder.newline
+                return response
+
+            return self.ServeLoginPage()
+
+
+
 
     def LoginHandler(self, httpMessage):
         if httpMessage.command == 'GET':
@@ -93,10 +112,13 @@ class HttpServer(threading.Thread):
             #check for valid user name and password
             dbInstance = DataBase.GetInstance()
             if dbInstance.ValidateUser(userName, password):
+                #make JWT java web token
+                encodedToken = TokenAuthentication.CreateToken({"UserName": userName})
                 response = "HTTP/1.1 303 See Other" + HttpResponseBuilder.newline
                 response += "Location: " + "/main" + HttpResponseBuilder.newline
                 response += HttpResponseBuilder.AddCookieHeader("password",password)
                 response += HttpResponseBuilder.AddCookieHeader("userName", userName)
+                response += HttpResponseBuilder.AddCookieHeader("Token", encodedToken)
                 return response
             else:
                 return self.ServeLoginPage()

@@ -61,4 +61,5 @@ class HttpResponseBuilder:
     '''
     @staticmethod
     def AddCookieHeader(cookieName, cookieValue):
+        print(type(cookieValue))
         return HttpResponseBuilder.AddHeader("Set-Cookie", cookieName + "=" + cookieValue)

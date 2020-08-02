@@ -40,7 +40,6 @@ class HttpMessage:
     def ParseBody(self, socket, linesLeft):
         #could have an issue since I am not join back with newline
         self.body = ''.join(linesLeft)
-        print("Number of bytes in body init read: " + str(len(self.body)))
         sizeOfBody = 0
         contentLenthHeader = "content-length"
         if contentLenthHeader in self.headers.keys():
@@ -49,7 +48,6 @@ class HttpMessage:
         bytesLeftToBeSent = sizeOfBody - len(self.body)
         while bytesLeftToBeSent > 0:
             newBytes = socket.recv(bytesLeftToBeSent).decode()
-            print("Read " + str(len(newBytes)) + " bytes")
             bytesLeftToBeSent -= len(newBytes)
             self.body += newBytes
         

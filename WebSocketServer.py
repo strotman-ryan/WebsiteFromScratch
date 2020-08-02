@@ -6,6 +6,8 @@ import json
 import asyncio
 import websockets
 from datetime import datetime
+from DataBase.DataBase import DataBase
+from TokenAuthentication import TokenAuthentication
 
 class WebSocketServer(threading.Thread):
 
@@ -62,8 +64,18 @@ class WebSocketServer(threading.Thread):
         # register(websocket) sends user_event() to websocket
         await self.register(websocket)
         try:
-            async for message in websocket:
+            async for content in websocket:
+                print(content)
+                contentJson = json.loads(content)
+                print(contentJson)
                 time = str(datetime.now())
+                message =  contentJson["message"]
+                valid, tokenBody = TokenAuthentication.DecodeToken(contentJson["Token"])
+                if not valid:
+                    continue
+                print(tokenBody)
+                print(tokenBody["UserName"])
+                DataBase.GetInstance().AddMessage(message, tokenBody["UserName"])
                 self.messages.addMessage(time, message)
                 await self.NotifyUsers(time, message)
         finally:

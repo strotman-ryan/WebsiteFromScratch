@@ -64,3 +64,17 @@ class DataBase:
             return False
         raise Exception("Multiple users in Data Base with same username")
 
+    '''
+    adds a new message to the message table with the proper userId
+    '''
+    def AddMessage(self, message, userName):
+        addMessage = '''insert into Messages (message, userId)
+                        values(%s, 
+                        (select id from User where userName = %s))'''
+        cursor = self.connection.cursor()
+        cursor.execute(addMessage,(message,userName))
+        self.connection.commit()
+        cursor.close()
+
+#DataBase.GetInstance().AddNewUser("mattew", "pass word")
+
