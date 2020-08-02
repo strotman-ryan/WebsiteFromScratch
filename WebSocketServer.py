@@ -11,8 +11,7 @@ from TokenAuthentication import TokenAuthentication
 
 class WebSocketServer(threading.Thread):
 
-    def __init__(self, messages, network):
-        self.messages = messages
+    def __init__(self,  network):
         self.network = network
         self.users = set()   #all the websockets currently open
         threading.Thread.__init__(self)

@@ -11,14 +11,12 @@ Creates a shared object
 
 from HttpServer import HttpServer
 from WebSocketServer import WebSocketServer
-from Messages import Messages
 from Network import Network
 
 def main():
-    messages = Messages()
     network = Network()
-    httpThread = HttpServer(messages, network)
-    webSocketThread = WebSocketServer(messages, network)
+    httpThread = HttpServer( network)
+    webSocketThread = WebSocketServer( network)
 
     webSocketThread.start()
     httpThread.start()

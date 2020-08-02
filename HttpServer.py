@@ -17,8 +17,7 @@ seceretKey = "This seceret string chang later"
 
 class HttpServer(threading.Thread):
 
-    def __init__(self, messages, network):
-        self.messages = messages
+    def __init__(self, network):
         threading.Thread.__init__(self)
         self.network = network
 
