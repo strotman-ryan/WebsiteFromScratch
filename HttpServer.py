@@ -1,4 +1,5 @@
 
+from DataBase.DataBase import DataBase #important to keep this as the first import!
 from socket import SHUT_WR
 from HttpResponseBuilder import HttpResponseBuilder
 from datetime import datetime
@@ -7,6 +8,7 @@ from Network import Network
 import urllib.parse
 import json
 import threading 
+
 
 class HttpServer(threading.Thread):
 
@@ -58,7 +60,7 @@ class HttpServer(threading.Thread):
             return self.ServeIndex(httpMessage)
         else:
             #default go to login screen
-            return self.ServeLoginPage(httpMessage)
+            return self.LoginHandler(httpMessage)
         #TODO send 403 error message
 
     #serves a request that is looking for index
@@ -75,13 +77,9 @@ class HttpServer(threading.Thread):
             response += HttpResponseBuilder.newline
             return response
 
-    def ServeLoginPage(self, httpMessage):
+    def LoginHandler(self, httpMessage):
         if httpMessage.command == 'GET':
-            response = HttpResponseBuilder.MakeStatus200()
-            response += HttpResponseBuilder.MakeGenericHeader()
-            response += HttpResponseBuilder.MakeFile("Views/login.html", {})
-            response += HttpResponseBuilder.newline
-            return response
+            return self.ServeLoginPage()
         if httpMessage.command == 'POST':
             #check to make sure password is good
             #make token for user
@@ -89,11 +87,25 @@ class HttpServer(threading.Thread):
             info = httpMessage.body.split("&")
             userName = info[0].split('=')[1]
             password = info[1].split('=')[1]
-            print("User name is: "  +userName)
+            userName = urllib.parse.unquote_plus(userName)
+            password = urllib.parse.unquote_plus(password)
 
-            response = "HTTP/1.1 303 See Other" + HttpResponseBuilder.newline
-            response += "Location: " + "/main" + HttpResponseBuilder.newline
-            response += HttpResponseBuilder.AddCookieHeader("password",password)
-            response += HttpResponseBuilder.AddCookieHeader("userName", userName)
-            return response
+            #check for valid user name and password
+            dbInstance = DataBase.GetInstance()
+            if dbInstance.ValidateUser(userName, password):
+                response = "HTTP/1.1 303 See Other" + HttpResponseBuilder.newline
+                response += "Location: " + "/main" + HttpResponseBuilder.newline
+                response += HttpResponseBuilder.AddCookieHeader("password",password)
+                response += HttpResponseBuilder.AddCookieHeader("userName", userName)
+                return response
+            else:
+                return self.ServeLoginPage()
+
+    def ServeLoginPage(self):
+        response = HttpResponseBuilder.MakeStatus200()
+        response += HttpResponseBuilder.MakeGenericHeader()
+        response += HttpResponseBuilder.MakeFile("Views/login.html", {})
+        response += HttpResponseBuilder.newline
+        return response
+
 
