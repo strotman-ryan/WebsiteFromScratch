@@ -49,11 +49,11 @@ class WebSocketServer(threading.Thread):
     async def unregister(self, socket):
         self.users.remove(socket)
 
-    async def NotifyUsers(self, time, content):
+    async def NotifyUsers(self, user, content):
         if self.users:
             jsonToSend = []
             message = {}
-            message["time"] = time
+            message["user"] = user
             message["message"] = content
             jsonToSend.append(message)
             strJson = json.dumps(jsonToSend)
@@ -73,11 +73,8 @@ class WebSocketServer(threading.Thread):
                 valid, tokenBody = TokenAuthentication.DecodeToken(contentJson["Token"])
                 if not valid:
                     continue
-                print(tokenBody)
-                print(tokenBody["UserName"])
                 DataBase.GetInstance().AddMessage(message, tokenBody["UserName"])
-                self.messages.addMessage(time, message)
-                await self.NotifyUsers(time, message)
+                await self.NotifyUsers(tokenBody["UserName"], message)
         finally:
             await self.unregister(websocket)
 

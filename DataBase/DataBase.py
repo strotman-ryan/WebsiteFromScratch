@@ -57,6 +57,7 @@ class DataBase:
         cursor.execute(getUser,(userName,password))
         #results is a list of tuples
         results = cursor.fetchall()
+        cursor.close()
         #check the result set has one and only one user
         if len(results):
             return True
@@ -76,5 +77,22 @@ class DataBase:
         self.connection.commit()
         cursor.close()
 
-#DataBase.GetInstance().AddNewUser("mattew", "pass word")
+    '''
+    returns a list of tuples(message, user)
+    message and user are strings
+    '''
+    def GetAllMessages(self):
+        getAllMessages = '''
+            select Messages.message, User.userName
+            from Messages
+            inner join User on Messages.userId = User.id;
+            '''
+        cursor = self.connection.cursor()
+        cursor.execute(getAllMessages)
+        results = cursor.fetchall()
+        self.connection.commit()
+        cursor.close()
+        return results
 
+#DataBase.GetInstance().AddNewUser("mattew", "pass word")
+print(DataBase.GetInstance().GetAllMessages())

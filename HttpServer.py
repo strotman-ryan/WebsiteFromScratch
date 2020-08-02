@@ -82,9 +82,8 @@ class HttpServer(threading.Thread):
                 print("The user is " + decodedToken["UserName"])
                 response = HttpResponseBuilder.MakeStatus200()
                 response += HttpResponseBuilder.MakeGenericHeader()
-                messages, dateTime = self.messages.GetAllMessages()
                 params = {}
-                params['messages'] = zip(dateTime[::-1],messages[::-1])
+                params['messages'] = DataBase.GetInstance().GetAllMessages()
                 params['ipAddress'] = self.network.ServerIp
                 params['portNum'] = self.network.WebsocketPortNum
                 response += HttpResponseBuilder.MakeFile("Views/main.html", params)

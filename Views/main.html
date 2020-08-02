@@ -28,9 +28,9 @@
   <button name="submit" onclick="SendMessage()">Submit</button>
 
   <div id="allMessages">
-  {% for time, message in messages  %}
+  {% for message, user in messages  %}
   <div class="message" >
-    <div class="time">{{time}}:</div>
+    <div class="time">{{user}}:</div>
     <div class="text"> {{message}} </div>
   </div>
   {% endfor %}
@@ -51,7 +51,7 @@
           div.className = "message";
           var timeDiv = document.createElement('div');
           timeDiv.className = "time";
-          timeDiv.innerHTML = jsonObj[i]['time'];
+          timeDiv.innerHTML = jsonObj[i]['user'];
           var messageDiv = document.createElement('div');
           messageDiv.className = "text";
           messageDiv.innerHTML = jsonObj[i]['message']
