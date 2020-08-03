@@ -10,7 +10,7 @@ create table User (
 	id int not null auto_increment,
 	userName varchar(30) unique,
     password varchar(50),
-    primary key(id),
+    primary key(id)
 );
 
 
