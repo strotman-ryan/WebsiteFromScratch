@@ -104,6 +104,3 @@ class DataBase:
         self.connection.commit()
         cursor.close()
         return results
-
-#DataBase.GetInstance().AddNewUser("mattew", "pass word")
-print(DataBase.GetInstance().AddNewUser("Rayan", "hello"))
