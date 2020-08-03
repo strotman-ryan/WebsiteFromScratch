@@ -1,21 +1,21 @@
-
 <html>
 <head>
     <title>
-        Login to Ryan's Website
+        Sign up to Website
     </title>
 </head>
 <body>
-    <form method="POST" action="/login">
+    <div>
+        Sign up for the website!
+    </div>
+    <form method="POST" action="/signup">
         <label for="userName">Username:</label>
         <input type="text" name="userName" id="userName"/> <br><br>
         <label for="password">Password:</label>
         <input type="text" name="password" id="password"/> <br>
+        <label for="rePassword">Re-enter Password:</label>
+        <input type="text" name="rePassword" id="rePassword"/> <br>
         <input type="submit" value="Submit"/>
     </form>
-    <div>
-        Have not signed up yet?
-    </div>
-    <a href="/signup">sign up</a>
 </body>
 </html>

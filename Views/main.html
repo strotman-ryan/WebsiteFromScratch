@@ -1,6 +1,6 @@
 <html>
 <head>
-	<title>Ryan's website</title>
+	<title>The boy's website</title>
 </head>
 <style>
   div.text{
@@ -28,8 +28,9 @@
   <button name="submit" onclick="SendMessage()">Submit</button>
 
   <div id="allMessages">
-  {% for message, user in messages  %}
+  {% for message, user, time in messages  %}
   <div class="message" >
+    <div>{{time}}</div>
     <div class="time">{{user}}:</div>
     <div class="text"> {{message}} </div>
   </div>

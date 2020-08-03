@@ -39,14 +39,25 @@ class DataBase:
         return cnx
 
 
+    '''
+    Tries to add a new user
+    return <boolean> True if successful; false if not
+    Note: will fail if userName is not unique
+    '''
     def AddNewUser(self,userName, password):
         cursor = self.connection.cursor()
         add_user = ("INSERT INTO User "
                "(userName, password) "
                "VALUES (%s, %s)")
-        cursor.execute(add_user, (userName, password))
+        try:            
+            cursor.execute(add_user, (userName, password))
+        except Exception as e:
+            print("Error adding User: " + userName + "\n" + str(e))
+            cursor.close()
+            return False
         self.connection.commit()
         cursor.close()
+        return True
 
 
     def ValidateUser(self, userName, password):
@@ -78,12 +89,12 @@ class DataBase:
         cursor.close()
 
     '''
-    returns a list of tuples(message, user)
+    returns a list of tuples(message, user, timeOfMessage)
     message and user are strings
     '''
     def GetAllMessages(self):
         getAllMessages = '''
-            select Messages.message, User.userName
+            select Messages.message, User.userName, Messages.date_time
             from Messages
             inner join User on Messages.userId = User.id;
             '''
@@ -95,4 +106,4 @@ class DataBase:
         return results
 
 #DataBase.GetInstance().AddNewUser("mattew", "pass word")
-print(DataBase.GetInstance().GetAllMessages())
+print(DataBase.GetInstance().AddNewUser("Rayan", "hello"))

@@ -63,6 +63,8 @@ class HttpServer(threading.Thread):
         pathRoutes = httpMessage.pathRoutes
         if pathRoutes[0] in ['main','favicon.ico']:
             return self.ServeIndex(httpMessage)
+        elif pathRoutes[0] == "signup":
+            return self.SignUpHandler(httpMessage)
         else:
             #default go to login screen
             return self.LoginHandler(httpMessage)
@@ -111,20 +113,52 @@ class HttpServer(threading.Thread):
             dbInstance = DataBase.GetInstance()
             if dbInstance.ValidateUser(userName, password):
                 #make JWT java web token
-                encodedToken = TokenAuthentication.CreateToken({"UserName": userName})
-                response = "HTTP/1.1 303 See Other" + HttpResponseBuilder.newline
-                response += "Location: " + "/main" + HttpResponseBuilder.newline
-                response += HttpResponseBuilder.AddCookieHeader("password",password)
-                response += HttpResponseBuilder.AddCookieHeader("userName", userName)
-                response += HttpResponseBuilder.AddCookieHeader("Token", encodedToken)
-                return response
+                return self.RedirectToMainPage(userName)
             else:
                 return self.ServeLoginPage()
+
+    def RedirectToMainPage(self, userName):
+        #make JWT java web token
+        encodedToken = TokenAuthentication.CreateToken({"UserName": userName})
+        response = "HTTP/1.1 303 See Other" + HttpResponseBuilder.newline
+        response += "Location: " + "/main" + HttpResponseBuilder.newline
+        response += HttpResponseBuilder.AddCookieHeader("Token", encodedToken)
+        return response
 
     def ServeLoginPage(self):
         response = HttpResponseBuilder.MakeStatus200()
         response += HttpResponseBuilder.MakeGenericHeader()
         response += HttpResponseBuilder.MakeFile("Views/login.html", {})
+        response += HttpResponseBuilder.newline
+        return response
+
+    def SignUpHandler(self, httpMessage):
+        if httpMessage.command == 'GET':
+            return self.ServeSignUpPage()
+        if httpMessage.command == "POST":
+            return self.SignUpPostHandler(httpMessage)
+        #TODO return Error
+
+    def SignUpPostHandler(self,httpMessage):
+        
+        #check user name is unique
+        #Enter into database
+        postParams = httpMessage.ParseBodyPost()
+        #check password and re-password match
+        if postParams["password"] == postParams["rePassword"]:
+            if DataBase.GetInstance().AddNewUser(postParams["userName"],postParams["password"]):
+                #return redirect to main page
+                return self.RedirectToMainPage(postParams["userName"])
+            #return sign up page with error; TODO add error messages
+            return self.ServeSignUpPage()
+        #return to sign up page with error; TODO add error messages
+        return self.ServeSignUpPage()
+                
+
+    def ServeSignUpPage(self):
+        response = HttpResponseBuilder.MakeStatus200()
+        response += HttpResponseBuilder.MakeGenericHeader()
+        response += HttpResponseBuilder.MakeFile("Views/signUp.html", {})
         response += HttpResponseBuilder.newline
         return response
 

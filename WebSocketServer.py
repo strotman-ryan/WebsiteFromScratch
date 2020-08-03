@@ -64,13 +64,11 @@ class WebSocketServer(threading.Thread):
         await self.register(websocket)
         try:
             async for content in websocket:
-                print(content)
                 contentJson = json.loads(content)
-                print(contentJson)
-                time = str(datetime.now())
                 message =  contentJson["message"]
                 valid, tokenBody = TokenAuthentication.DecodeToken(contentJson["Token"])
                 if not valid:
+                    #TODO close connection in this scenario
                     continue
                 DataBase.GetInstance().AddMessage(message, tokenBody["UserName"])
                 await self.NotifyUsers(tokenBody["UserName"], message)

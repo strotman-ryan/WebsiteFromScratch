@@ -50,6 +50,19 @@ class HttpMessage:
             newBytes = socket.recv(bytesLeftToBeSent).decode()
             bytesLeftToBeSent -= len(newBytes)
             self.body += newBytes
+
+
+    '''
+    parses the body of an http post request into a dictionary of values
+    returns <dict<string, string>> the post body
+    '''
+    def ParseBodyPost(self):
+        bodyParams = self.body.split("&")
+        paramDict = {}
+        for param in bodyParams:
+            paramParts = param.split("=")
+            paramDict[paramParts[0]] = paramParts[1]
+        return paramDict
         
 
     '''
