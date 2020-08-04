@@ -9,7 +9,7 @@ use Website;
 create table User (
 	id int not null auto_increment,
 	userName varchar(30) unique,
-    password varchar(50),
+    password char(60), #size of hash; salt is in this hash
     primary key(id)
 );
 
@@ -23,10 +23,4 @@ create table Messages(
     primary key(id)
 );
 
-
-insert into User(userName, password)
-values("ryan", "password");
-
-insert into User(userName, password)
-values("matthew", "password");
 

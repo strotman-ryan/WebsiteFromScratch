@@ -3,7 +3,9 @@
 #connects to a databse and does certain actions
 import mysql.connector
 import threading
-
+import hashlib 
+import os
+import bcrypt
 
 #TODO can you have multiple cursor objects for same connection?
 #with many theards? is it thread safe?
@@ -50,7 +52,7 @@ class DataBase:
                "(userName, password) "
                "VALUES (%s, %s)")
         try:            
-            cursor.execute(add_user, (userName, password))
+            cursor.execute(add_user, (userName, self.get_hashed_password(password.encode())))
         except Exception as e:
             print("Error adding User: " + userName + "\n" + str(e))
             cursor.close()
@@ -59,22 +61,37 @@ class DataBase:
         cursor.close()
         return True
 
+    def get_hashed_password(self,plain_text_password):
+        # Hash a password for the first time
+        #   (Using bcrypt, the salt is saved into the hash itself)
+        return bcrypt.hashpw(plain_text_password, bcrypt.gensalt(12))
 
-    def ValidateUser(self, userName, password):
-        getUser = """select userName, password
+    def check_password(self, plain_text_password, hashed_password):
+        # Check hashed password. Using bcrypt, the salt is saved into the hash itself
+        return bcrypt.checkpw(plain_text_password.encode(), hashed_password.encode())
+
+    def GetUsersPassword(self, userName):
+        getPassword = """select password
             from User
-            where userName = %s and password = %s"""
+            where userName = %s"""
         cursor = self.connection.cursor()
-        cursor.execute(getUser,(userName,password))
-        #results is a list of tuples
+        cursor.execute(getPassword,(userName,))
         results = cursor.fetchall()
         cursor.close()
         #check the result set has one and only one user
-        if len(results):
-            return True
+        if len(results) > 1:
+            #this should never happen
+            raise Exception("Multiple users in Data Base with same username")
         if len(results) == 0:
-            return False
-        raise Exception("Multiple users in Data Base with same username")
+            return None
+        return results[0][0]
+
+    def ValidateUser(self, userName, password):
+        hashedPassword = self.GetUsersPassword(userName)
+        print(hashedPassword)
+        if hashedPassword != None:
+            return self.check_password(password, hashedPassword)
+        return False
 
     '''
     adds a new message to the message table with the proper userId
@@ -104,3 +121,6 @@ class DataBase:
         self.connection.commit()
         cursor.close()
         return results
+
+#DataBase.GetInstance().AddNewUser("bob2", "hello")
+print(DataBase.GetInstance().ValidateUser("bob2","hello"))
