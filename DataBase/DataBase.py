@@ -88,7 +88,6 @@ class DataBase:
 
     def ValidateUser(self, userName, password):
         hashedPassword = self.GetUsersPassword(userName)
-        print(hashedPassword)
         if hashedPassword != None:
             return self.check_password(password, hashedPassword)
         return False
@@ -113,7 +112,8 @@ class DataBase:
         getAllMessages = '''
             select Messages.message, User.userName, Messages.date_time
             from Messages
-            inner join User on Messages.userId = User.id;
+            inner join User on Messages.userId = User.id
+            order by Messages.date_Time desc;
             '''
         cursor = self.connection.cursor()
         cursor.execute(getAllMessages)
@@ -121,6 +121,3 @@ class DataBase:
         self.connection.commit()
         cursor.close()
         return results
-
-#DataBase.GetInstance().AddNewUser("bob2", "hello")
-print(DataBase.GetInstance().ValidateUser("bob2","hello"))
