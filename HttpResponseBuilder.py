@@ -1,7 +1,7 @@
 
 
 from jinja2 import Template
-
+from Logging import Logging
 
 class HttpResponseBuilder:
     '''

@@ -6,6 +6,7 @@ import threading
 import hashlib 
 import os
 import bcrypt
+from Logging import Logging
 
 #TODO can you have multiple cursor objects for same connection?
 #with many theards? is it thread safe?
@@ -27,7 +28,7 @@ class DataBase:
         if DataBase._instace != None:
             raise Exception("This is a singleton. Call GetInstance()")
         else:
-            print("Making DataBaseConnection")
+            Logging.WriteToLog("Making DataBaseConnection")
             self.connection = self._connectToDataBase()
             DataBase._instace = self
 
@@ -54,7 +55,7 @@ class DataBase:
         try:            
             cursor.execute(add_user, (userName, self.get_hashed_password(password.encode())))
         except Exception as e:
-            print("Error adding User: " + userName + "\n" + str(e))
+            Logging.WriteToLog("Error adding User: " + userName + "\n" + str(e))
             cursor.close()
             return False
         self.connection.commit()
@@ -103,6 +104,7 @@ class DataBase:
         cursor.execute(addMessage,(message,userName))
         self.connection.commit()
         cursor.close()
+
 
     '''
     returns a list of tuples(message, user, timeOfMessage)

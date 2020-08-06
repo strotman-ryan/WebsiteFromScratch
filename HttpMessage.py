@@ -1,5 +1,5 @@
 
-
+from Logging import Logging
 
 class HttpMessage:
 
@@ -23,7 +23,7 @@ class HttpMessage:
     def __init__(self, socket):
         #TODO be able to receive large messages
         rawinput = socket.recv(5000).decode()
-        print("bytes received: " + str(len(rawinput)) + "\n")
+        Logging.WriteToLog("bytes received: " + str(len(rawinput)) + "\n")
         lines = rawinput.split(self.new_line)
         self.ParseFirstLine(lines[0])
         #parse headers
@@ -109,17 +109,18 @@ class HttpMessage:
 
 
     def Print(self):
-        print('----------http message----------------')
-        print('command: ' + self.command)
-        print('path: ' + self.path)
-        print('pathRoute: ')
-        print(self.pathRoutes)
-        print('urlArgs: ')
-        print(self.urlArgs)
-        print('version: ' + self.version)
-        print('--headers--')
+        Logging.WriteToLog('----------http message----------------')
+        Logging.WriteToLog('command: ' + self.command)
+        Logging.WriteToLog('path: ' + self.path)
+        Logging.WriteToLog('pathRoute: ')
+        Logging.WriteToLog(self.pathRoutes)
+        Logging.WriteToLog('urlArgs: ')
+        Logging.WriteToLog(self.urlArgs)
+        Logging.WriteToLog('version: ' + self.version)
+        Logging.WriteToLog('--headers--')
         for key, value in self.headers.items():
-            print(key + ": " + value)
+            Logging.WriteToLog(key + ": " + value)
+            print()
         print('--cookies--')
         for key, value in self.cookies.items():
             print(key + " = " + value)

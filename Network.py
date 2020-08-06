@@ -1,5 +1,6 @@
 
 from socket import AF_INET, socket, SOCK_STREAM
+from Logging import Logging
 
 '''
 contains the information for the ip and port
@@ -7,7 +8,7 @@ contains the information for the ip and port
 class Network:
 
     #members of the class
-    ServerIp = '192.168.1.4'
+    ServerIp = '192.168.1.5'
     
     ServerPortNum = 1024
 
@@ -25,9 +26,9 @@ class Network:
                 self.serversocket = socket(AF_INET, SOCK_STREAM)
                 self.serversocket.bind((self.ServerIp,self.ServerPortNum)) # this is the line that fails
                 self.WebsocketPortNum = self.ServerPortNum + 1
-                print('Access http://' + self.ServerIp + ':' + str(self.ServerPortNum))
+                Logging.WriteToLog('Access http://' + self.ServerIp + ':' + str(self.ServerPortNum))
                 return
             except Exception as exc :
-                print("Error Finding port " +str(self.ServerPortNum) +":\n")
-                print(exc)
+                Logging.WriteToLog("Error Finding port " +str(self.ServerPortNum) +":\n")
+                Logging.WriteToLog(exc)
                 self.ServerPortNum += 1
